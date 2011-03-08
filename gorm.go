@@ -1,7 +1,6 @@
 package gorm
 
 import (
-	// "fmt"
 	"reflect"
 	"strings"
 	// "gosqlite.googlecode.com/hg/sqlite"
@@ -22,7 +21,21 @@ func getTypeName(obj interface{}) (typestr string, isPtr bool) {
 }
 
 func snakeCasedName(name string) string {
-	return ""
+	newstr := make([]int, 0)
+	firstTime := true
+	
+	for _, chr := range name {
+		if isUpper := 'A' <= chr && chr <= 'Z'; isUpper {
+			if !firstTime {
+				newstr = append(newstr, '_')
+			}
+			chr -= ('A' - 'a')
+		}
+		newstr = append(newstr, chr)
+		firstTime = false
+	}
+	
+	return string(newstr)
 }
 
 func main() {

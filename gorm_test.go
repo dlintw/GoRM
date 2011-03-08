@@ -19,3 +19,17 @@ func TestTypeName(t *testing.T) {
 		t.Errorf("Didn't expect %v to be a pointer\n", pete)
 	}
 }
+
+func TestSnakeCasing(t *testing.T) {
+	names := map[string]string {
+		"ThisThat": "this_that",
+		"WhatIAm": "what_i_am",
+		"IAmNot": "i_am_not",
+		"Shop": "shop",
+	}
+	for key, val := range names {
+		if name := snakeCasedName(key); name != val {
+			t.Errorf("Expected [%v] to translate to [%v], got [%v]\n", key, val, name)
+		}
+	}
+}
