@@ -1,16 +1,11 @@
-package main
+package gorm
 
 import (
-	"fmt"
+	// "fmt"
 	"reflect"
 	"strings"
-	"gosqlite.googlecode.com/hg/sqlite"
+	// "gosqlite.googlecode.com/hg/sqlite"
 )
-
-type PersonStruct struct {
-	age int
-	name string
-}
 
 func getTypeName(obj interface{}) (typestr string, isPtr bool) {
 	typ := reflect.Typeof(obj)
@@ -31,11 +26,4 @@ func snakeCasedName(name string) string {
 }
 
 func main() {
-	fmt.Println(sqlite.Version())
-	return
-	
-	steven1 := new(PersonStruct)
-	var steven2 PersonStruct
-	fmt.Println(getTypeName(steven1))
-	fmt.Println(getTypeName(steven2))
 }
