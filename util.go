@@ -25,13 +25,14 @@ func snakeCasedName(name string) string {
 	
 	for _, chr := range name {
 		if isUpper := 'A' <= chr && chr <= 'Z'; isUpper {
-			if !firstTime {
+			if firstTime == true {
+				firstTime = false
+			} else {
 				newstr = append(newstr, '_')
 			}
 			chr -= ('A' - 'a')
 		}
 		newstr = append(newstr, chr)
-		firstTime = false
 	}
 	
 	return string(newstr)
