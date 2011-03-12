@@ -25,8 +25,7 @@ func TestGetSingle(t *testing.T) {
 	db, err := OpenDB("test.db")
 	defer db.Close()
 	
-	bob := Person{}
-	
+	var bob Person
 	err = db.Get(&bob, "name = ?", "bob")
 	
 	if err != nil {
@@ -38,12 +37,28 @@ func TestGetSingle(t *testing.T) {
 	}
 }
 
+func TestGetSingleById(t *testing.T) {
+	db, err := OpenDB("test.db")
+	defer db.Close()
+	
+	var bob Person
+	err = db.Get(&bob, 2)
+	
+	if err != nil {
+		t.Error(err)
+	}
+
+	if bob.Name != "bob" || bob.Age != 24 || bob.Id != 2 {
+		t.Errorf("bob was not filled out properly [%v]", bob)
+	}
+}
+
+
 func TestGetMultiple(t *testing.T) {
 	db, err := OpenDB("test.db")
 	defer db.Close()
 	
 	var peoples []Person
-	
 	err = db.GetAll(&peoples, "id > 0")
 	
 	if err != nil {

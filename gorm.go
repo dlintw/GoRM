@@ -21,19 +21,29 @@ func OpenDB(filename string) (*Conn, os.Error) {
 	return &Conn{conn: conn}, err
 }
 
-func (c *Conn) Get(rowStruct interface{}, condition string, args ...interface{}) os.Error {
+func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
 	tname, _ := getTypeName(rowStruct)
 	tname = snakeCasedName(tname)
 	tableName := pluralizeString(tname)
 	
-	condition, err := escapeString(condition, args...)
+	conditionStr := ""
+	
+	switch condition := condition.(type) {
+	case string:
+		conditionStr = condition
+	case int:
+		conditionStr = "id = ?"
+		args = append(args, condition)
+	}
+	
+	conditionStr, err := escapeString(conditionStr, args...)
 	if err != nil {
 		return err
 	}
 	
-	condition = fmt.Sprintf("where %v", condition)
+	conditionStr = fmt.Sprintf("where %v", conditionStr)
 	
-    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, condition))
+    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, conditionStr))
     if err != nil {
             log.Fatal(err)
     }
