@@ -40,17 +40,13 @@ func snakeCasedName(name string) string {
 
 func titleCasedName(name string) string {
 	newstr := make([]int, 0)
-	firstTime := true
-	upNextChar := false
+	upNextChar := true
 	
 	for _, chr := range name {
 		switch {
 		case upNextChar:
 			upNextChar = false
-			fallthrough
-		case firstTime:
 			chr -= ('a' - 'A')
-			firstTime = false
 		case chr == '_':
 			upNextChar = true
 			continue
