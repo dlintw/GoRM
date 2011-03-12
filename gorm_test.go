@@ -2,6 +2,8 @@ package gorm
 
 import (
 	"testing"
+	"io/ioutil"
+	"bytes"
 )
 
 type Person struct {
@@ -22,11 +24,11 @@ func TestOpenDB(t *testing.T) {
 }
 
 func TestGetSingle(t *testing.T) {
-	db, err := OpenDB("test.db")
+	db, _ := OpenDB("test.db")
 	defer db.Close()
 	
 	var bob Person
-	err = db.Get(&bob, "name = ?", "bob")
+	err := db.Get(&bob, "name = ?", "bob")
 	
 	if err != nil {
 		t.Error(err)
@@ -38,11 +40,11 @@ func TestGetSingle(t *testing.T) {
 }
 
 func TestGetSingleById(t *testing.T) {
-	db, err := OpenDB("test.db")
+	db, _ := OpenDB("test.db")
 	defer db.Close()
 	
 	var bob Person
-	err = db.Get(&bob, 2)
+	err := db.Get(&bob, 2)
 	
 	if err != nil {
 		t.Error(err)
@@ -53,13 +55,62 @@ func TestGetSingleById(t *testing.T) {
 	}
 }
 
+func copyTemp(t *testing.T, path string) string {
+	f, err := ioutil.TempFile("", "")
+	if err != nil {
+		t.Errorf("could not create tempfile for writing")
+	}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		t.Errorf("could not read supposedly 'copyable' file")
+	}
+	f.Write(data)
+	return f.Name()
+}
+
+func TestCopyTemp(t *testing.T) {
+	name := "test.db"
+	tmpName := copyTemp(t, name)
+	if name == tmpName {
+		t.Errorf("copyTemp should have given a filename other than %q", name)
+	}
+	data1, err1 := ioutil.ReadFile(name)
+	data2, err2 := ioutil.ReadFile(tmpName)
+	if err1 != nil || err2 != nil || bytes.Compare(data1, data2) != 0 {
+		t.Errorf("copyTemp did not copy the file correctly.")
+	}
+}
+
+func TestSave(t *testing.T) {
+	db, _ := OpenDB(copyTemp(t, "test.db"))
+	defer db.Close()
+	
+	newName := "Fred Jones"
+	
+	var bob Person
+	db.Get(&bob, 2)
+	
+	bob.Name = newName
+	db.Save(&bob)
+	
+	var fred Person
+	err := db.Get(&fred, 2)
+	
+	if err != nil {
+		t.Error(err)
+	}
+	
+	if fred.Name != newName {
+		t.Errorf("name should have been %q, got %q instead", fred.Name)
+	}
+}
 
 func TestGetMultiple(t *testing.T) {
-	db, err := OpenDB("test.db")
+	db, _ := OpenDB("test.db")
 	defer db.Close()
 	
 	var peoples []Person
-	err = db.GetAll(&peoples, "id > 0")
+	err := db.GetAll(&peoples, "id > 0")
 	
 	if err != nil {
 		t.Error(err)
