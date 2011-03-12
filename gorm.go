@@ -21,10 +21,12 @@ func OpenDB(filename string) (*Conn, os.Error) {
 	return &Conn{conn: conn}, err
 }
 
+func getTableName(obj interface{}) string {
+	return pluralizeString(snakeCasedName(getTypeName(obj)))
+}
+
 func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
-	tname, _ := getTypeName(rowStruct)
-	tname = snakeCasedName(tname)
-	tableName := pluralizeString(tname)
+	tableName := getTableName(rowStruct)
 	
 	conditionStr := ""
 	
@@ -86,9 +88,7 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 	
 	sliceElementType := sliceType.Elem()
 	
-	tname, _ := getTypeName(rowsSlicePtr)
-	tname = snakeCasedName(tname)
-	tableName := pluralizeString(tname)
+	tableName := getTableName(rowsSlicePtr)
 	
 	condition, err := escapeString(condition, args...)
 	if err != nil {

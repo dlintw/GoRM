@@ -13,12 +13,9 @@ func TestTypeName(t *testing.T) {
 	}
 	
 	var pete PersonStruct
-	tname, isptr := getTypeName(pete)
+	tname := getTypeName(pete)
 	if tname != "PersonStruct" {
 		t.Errorf("Expected type %T to be PersonStruct, got %v\n", pete, tname)
-	}
-	if isptr != false {
-		t.Errorf("Didn't expect %v to be a pointer\n", pete)
 	}
 }
 

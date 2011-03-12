@@ -8,11 +8,9 @@ import (
 	"fmt"
 )
 
-func getTypeName(obj interface{}) (typestr string, isPtr bool) {
+func getTypeName(obj interface{}) (typestr string) {
 	typ := reflect.Typeof(obj)
 	typestr = typ.String()
-	
-	isPtr = strings.HasPrefix(typestr, "*")
 	
 	lastDotIndex := strings.LastIndex(typestr, ".")
 	if lastDotIndex != -1 {
