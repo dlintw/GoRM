@@ -25,9 +25,30 @@ func getTableName(obj interface{}) string {
 	return pluralizeString(snakeCasedName(getTypeName(obj)))
 }
 
-func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
-	tableName := getTableName(rowStruct)
+func (c *Conn) getResultsForQuery(tableName, condition string) (resultsSlice []map[string][]byte, err os.Error) {
+    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, condition))
+    if err != nil {
+		return nil, err
+    }
+
+    defer s.Finalize()
+    err = s.Exec()
+    if err != nil {
+        return nil, err
+    }
 	
+	for s.Next() {
+		results, err := s.ResultsAsMap()
+		if err != nil {
+			return nil, err
+		}
+		resultsSlice = append(resultsSlice, results)
+	}
+	
+	return
+}
+
+func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
 	conditionStr := ""
 	
 	switch condition := condition.(type) {
@@ -45,27 +66,18 @@ func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interfa
 	
 	conditionStr = fmt.Sprintf("where %v", conditionStr)
 	
-    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, conditionStr))
-    if err != nil {
-            log.Fatal(err)
-    }
-    defer s.Finalize()
-    err = s.Exec()
-    if err != nil {
-        log.Fatal(err)
-    }
-	
-	if s.Next() {
-		results, err := s.ResultsAsMap()
-		if err != nil {
-			return err
-		}
-		scanMapIntoStruct(reflect.NewValue(rowStruct), results)
-	} else {
-		return os.NewError("did not find any results")
+	resultsSlice, err := c.getResultsForQuery(getTableName(rowStruct), conditionStr)
+	if err != nil {
+		return err
 	}
 	
-	if s.Next() {
+	switch len(resultsSlice) {
+	case 0:
+		return os.NewError("did not find any results")
+	case 1:
+		results := resultsSlice[0]
+		scanMapIntoStruct(reflect.NewValue(rowStruct), results)
+	default:
 		return os.NewError("more than one row matched")
 	}
 	
@@ -88,8 +100,6 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 	
 	sliceElementType := sliceType.Elem()
 	
-	tableName := getTableName(rowsSlicePtr)
-	
 	condition, err := escapeString(condition, args...)
 	if err != nil {
 		return err
@@ -97,26 +107,14 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 	
 	condition = fmt.Sprintf("where %v", condition)
 	
-    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, condition))
-    if err != nil {
+	resultsSlice, err := c.getResultsForQuery(getTableName(rowsSlicePtr), condition)
+	if err != nil {
 		log.Fatal(err)
-    }
-    defer s.Finalize()
-    err = s.Exec()
-    if err != nil {
-        log.Fatal(err)
-    }
-
-	for s.Next() {
+	}
+	
+	for _, results := range resultsSlice {
 		newValue := reflect.MakeZero(sliceElementType)
-		
-		results, err := s.ResultsAsMap()
-		if err != nil {
-			return err
-		}
-		
 		scanMapIntoStruct(newValue.Addr(), results)
-		
 		sliceValue.SetValue(reflect.Append(sliceValue, newValue))
 	}
 	
