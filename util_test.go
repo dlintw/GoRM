@@ -84,6 +84,28 @@ func TestEscapeString(t *testing.T) {
 	}
 }
 
+func TestScanStructIntoMap(t *testing.T) {
+	var pete Person
+	pete.Name = "bob"
+	pete.Age = 32
+	pete.Id = 7
+	
+	peteMap, err := scanStructIntoMap(reflect.NewValue(&pete))
+	if err != nil {
+		t.Error(err)
+	}
+	
+	peteComparableMap := map[string]interface{} {
+		"name": "bob",
+		"age": 32,
+		"id": 7,
+	}
+	
+	if !reflect.DeepEqual(peteMap, peteComparableMap) {
+		t.Errorf("pete's map was not filled out properly. have %v, want %v", peteMap, peteComparableMap)
+	}
+}
+
 func TestScanMapIntoStruct(t *testing.T) {
 	personMap := map[string][]byte {
 		"name": []byte("bob"),

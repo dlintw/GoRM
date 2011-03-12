@@ -133,3 +133,31 @@ func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
 	
 	return nil
 }
+
+func scanStructIntoMap(obj reflect.Value) (map[string]interface{}, os.Error) {
+	objPtr, ok := obj.(*reflect.PtrValue)
+	if !ok {
+		return nil, os.NewError("needed a pointer")
+	}
+	
+	dataStruct, ok := objPtr.Elem().(*reflect.StructValue)
+	if !ok {
+		return nil, os.NewError("expected a pointer to a struct")
+	}
+	
+	dataStructType := dataStruct.Type().(*reflect.StructType)
+	
+	mapped := make(map[string]interface{})
+	
+	for i := 0; i < dataStructType.NumField(); i++ {
+		field := dataStructType.Field(i)
+		fieldName := field.Name
+		
+		mapKey := snakeCasedName(fieldName)
+		value := dataStruct.FieldByName(fieldName).Interface()
+		
+		mapped[mapKey] = value
+	}
+	
+	return mapped, nil
+}

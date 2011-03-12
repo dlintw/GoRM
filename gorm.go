@@ -47,6 +47,12 @@ func (c *Conn) getResultsForQuery(tableName, condition string) (resultsSlice []m
 	return
 }
 
+func (c *Conn) Save(rowStruct interface{}) os.Error {
+	
+	
+	return nil
+}
+
 func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
 	conditionStr := ""
 	
