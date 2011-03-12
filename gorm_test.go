@@ -4,6 +4,7 @@ import (
 	"testing"
 	"io/ioutil"
 	"bytes"
+	"reflect"
 )
 
 type Person struct {
@@ -101,7 +102,7 @@ func TestSave(t *testing.T) {
 	}
 	
 	if fred.Name != newName {
-		t.Errorf("name should have been %q, got %q instead", fred.Name)
+		t.Errorf("name should have been %q, got %q instead", newName, fred.Name)
 	}
 }
 
@@ -120,19 +121,12 @@ func TestGetMultiple(t *testing.T) {
 		t.Errorf("wrong number of people returned, should be 2, but got %d", len(peoples))
 	}
 	
-	hasBob := false
-	hasJohn := false
-	
-	for _, guy := range peoples {
-		if guy.Name == "john" && guy.Id == 1 && guy.Age == 42 {
-			hasJohn = true
-		}
-		if guy.Name == "bob" && guy.Id == 2 && guy.Age == 24 {
-			hasBob = true
-		}
+	comparablePeoples := []Person {
+		Person{Name: "john", Id: 1, Age: 42},
+		Person{Name: "bob", Id: 2, Age: 24},
 	}
 	
-	if !hasBob || !hasJohn {
+	if !reflect.DeepEqual(peoples, comparablePeoples) {
 		t.Errorf("peoples was not filled out properly %v", peoples)
 	}
 }
