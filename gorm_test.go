@@ -50,9 +50,23 @@ func TestGetMultiple(t *testing.T) {
 		t.Error(err)
 	}
 	
+	if len(peoples) != 2 {
+		t.Errorf("wrong number of people returned, should be 2, but got %d", len(peoples))
+	}
 	
+	hasBob := false
+	hasJohn := false
 	
-	if bob.Name != "bob" || bob.Age != 24 || bob.Id != 2 {
-		t.Errorf("bob was not filled out properly [%v]", bob)
+	for _, guy := range peoples {
+		if guy.Name == "john" && guy.Id == 1 && guy.Age == 42 {
+			hasJohn = true
+		}
+		if guy.Name == "bob" && guy.Id == 2 && guy.Age == 24 {
+			hasBob = true
+		}
+	}
+	
+	if !hasBob || !hasJohn {
+		t.Errorf("peoples was not filled out properly [%v]", peoples)
 	}
 }
