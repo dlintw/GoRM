@@ -22,7 +22,7 @@ func TestOpenDB(t *testing.T) {
 }
 
 func TestGetSingle(t *testing.T) {
-	return // gotta test scanning map into struct first
+	// return // gotta test scanning map into struct first
 	
 	db, err := OpenDB("test.db")
 	defer db.Close()
@@ -35,7 +35,7 @@ func TestGetSingle(t *testing.T) {
 		t.Error(err)
 	}
 	
-	if bob.Name != "bob" || bob.Age != 42 || bob.Id != 2 {
+	if bob.Name != "bob" || bob.Age != 24 || bob.Id != 2 {
 		t.Errorf("bob was not filled out properly [%v]", bob)
 	}
 }

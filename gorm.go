@@ -46,10 +46,10 @@ func (c *Conn) Get(rowStruct interface{}, condition string, args ...interface{})
 	
 	if s.Next() {
 		results, err := s.ResultsAsMap()
-		
-		log.Fatal(results)
-		
-		fmt.Println(results, err)
+		if err != nil {
+			return err
+		}
+		scanMapIntoStruct(rowStruct, results)
 	} else {
 		return os.NewError("did not find any results")
 	}
