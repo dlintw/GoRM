@@ -37,3 +37,27 @@ func snakeCasedName(name string) string {
 	
 	return string(newstr)
 }
+
+func titleCasedName(name string) string {
+	newstr := make([]int, 0)
+	firstTime := true
+	upNextChar := false
+	
+	for _, chr := range name {
+		switch {
+		case upNextChar:
+			upNextChar = false
+			fallthrough
+		case firstTime:
+			chr -= ('a' - 'A')
+			firstTime = false
+		case chr == '_':
+			upNextChar = true
+			continue
+		}
+		
+		newstr = append(newstr, chr)
+	}
+	
+	return string(newstr)
+}

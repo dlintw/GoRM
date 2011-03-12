@@ -33,3 +33,17 @@ func TestSnakeCasing(t *testing.T) {
 		}
 	}
 }
+
+func TestTitleCasing(t *testing.T) {
+	names := map[string]string {
+		"this_that": "ThisThat",
+		"what_i_am": "WhatIAm",
+		"i_am_not": "IAmNot",
+		"shop": "Shop",
+	}
+	for key, val := range names {
+		if name := titleCasedName(key); name != val {
+			t.Errorf("Expected [%v] to translate to [%v], got [%v]\n", key, val, name)
+		}
+	}
+}
