@@ -5,8 +5,6 @@ import (
 	"sdegutis/sqlite"
 	"fmt"
 	"reflect"
-	
-	// testing
 	"log"
 )
 
@@ -63,8 +61,6 @@ func (c *Conn) Get(rowStruct interface{}, condition string, args ...interface{})
 }
 
 func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interface{}) os.Error {
-	return nil // brb, changing api
-	
 	rowsPtrValue, _ := reflect.NewValue(rowsSlicePtr).(*reflect.PtrValue)
 	rowsPtrType, ok := reflect.Typeof(rowsSlicePtr).(*reflect.PtrType)
 	if !ok {
@@ -102,18 +98,16 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
     }
 
 	for s.Next() {
-		// newValue := reflect.NewValue(Person{1, "hi", 25})
 		newValue := reflect.MakeZero(sliceElementType)
-		// log.Fatalf("%v", &newValue)
 		
 		results, err := s.ResultsAsMap()
 		if err != nil {
 			return err
 		}
 		
-		scanMapIntoStruct(newValue, results)
+		scanMapIntoStruct(newValue.Addr(), results)
 		
-		sliceValue.Set(reflect.Append(sliceValue, newValue))
+		sliceValue.SetValue(reflect.Append(sliceValue, newValue))
 	}
 	
 	return nil
