@@ -88,18 +88,22 @@ func escapeString(str string, args ...interface{}) (result string, err os.Error)
 	return str, nil
 }
 
-func scanMapIntoStruct(obj interface{}, objMap map[string][]byte) os.Error {
-	objPtr, ok := reflect.NewValue(obj).(*reflect.PtrValue)
+func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
+	objPtr, ok := obj.(*reflect.PtrValue)
 	if !ok {
-		return os.NewError(fmt.Sprintf("%v", ok))
+		return os.NewError("needed pointer")
 	}
+	
 	dataStruct, ok := objPtr.Elem().(*reflect.StructValue)
 	if !ok {
-		return os.NewError(fmt.Sprintf("%v", ok))
+		return os.NewError("expected a pointer to a struct")
 	}
 	
 	for key, data := range objMap {
 		structField := dataStruct.FieldByName(titleCasedName(key))
+		if !structField.CanSet() {
+			continue
+		}
 		
 		var v interface{}
 		
@@ -125,11 +129,8 @@ func scanMapIntoStruct(obj interface{}, objMap map[string][]byte) os.Error {
 		default:
 			return os.NewError("unsupported type in Scan: " + reflect.Typeof(v).String())
 		}
-	
-		if structField.CanSet() {
-			nv := reflect.NewValue(v)
-			structField.SetValue(nv)
-		}
+		
+		structField.SetValue(reflect.NewValue(v))
 	}
 	
 	return nil

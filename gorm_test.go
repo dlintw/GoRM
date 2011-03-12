@@ -67,6 +67,6 @@ func TestGetMultiple(t *testing.T) {
 	}
 	
 	if !hasBob || !hasJohn {
-		t.Errorf("peoples was not filled out properly [%v]", peoples)
+		t.Errorf("peoples was not filled out properly %v", peoples)
 	}
 }

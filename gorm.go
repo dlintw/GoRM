@@ -4,6 +4,7 @@ import (
 	"os"
 	"sdegutis/sqlite"
 	"fmt"
+	"reflect"
 	
 	// testing
 	"log"
@@ -49,13 +50,70 @@ func (c *Conn) Get(rowStruct interface{}, condition string, args ...interface{})
 		if err != nil {
 			return err
 		}
-		scanMapIntoStruct(rowStruct, results)
+		scanMapIntoStruct(reflect.NewValue(rowStruct), results)
 	} else {
 		return os.NewError("did not find any results")
 	}
 	
 	if s.Next() {
 		return os.NewError("more than one row matched")
+	}
+	
+	return nil
+}
+
+func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interface{}) os.Error {
+	return nil // brb, changing api
+	
+	rowsPtrValue, _ := reflect.NewValue(rowsSlicePtr).(*reflect.PtrValue)
+	rowsPtrType, ok := reflect.Typeof(rowsSlicePtr).(*reflect.PtrType)
+	if !ok {
+		return os.NewError("needs a *pointer* to a slice")
+	}
+	
+	sliceValue, _ := rowsPtrValue.Elem().(*reflect.SliceValue)
+	sliceType, ok := rowsPtrType.Elem().(*reflect.SliceType)
+	if !ok {
+		log.Fatalf("%p", sliceType)
+		return os.NewError("needs a pointer to a *slice*")
+	}
+	
+	sliceElementType := sliceType.Elem()
+	
+	tname, _ := getTypeName(rowsSlicePtr)
+	tname = snakeCasedName(tname)
+	tableName := pluralizeString(tname)
+	
+	condition, err := escapeString(condition, args...)
+	if err != nil {
+		return err
+	}
+	
+	condition = fmt.Sprintf("where %v", condition)
+	
+    s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, condition))
+    if err != nil {
+		log.Fatal(err)
+    }
+    defer s.Finalize()
+    err = s.Exec()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	for s.Next() {
+		// newValue := reflect.NewValue(Person{1, "hi", 25})
+		newValue := reflect.MakeZero(sliceElementType)
+		// log.Fatalf("%v", &newValue)
+		
+		results, err := s.ResultsAsMap()
+		if err != nil {
+			return err
+		}
+		
+		scanMapIntoStruct(newValue, results)
+		
+		sliceValue.Set(reflect.Append(sliceValue, newValue))
 	}
 	
 	return nil

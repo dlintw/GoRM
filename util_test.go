@@ -2,6 +2,7 @@ package gorm
 
 import (
 	"testing"
+	"reflect"
 	"os"
 )
 
@@ -95,11 +96,11 @@ func TestScanMapIntoStruct(t *testing.T) {
 	
 	bob := Person{}
 	
-	err := scanMapIntoStruct(&bob, personMap)
+	err := scanMapIntoStruct(reflect.NewValue(&bob), personMap)
 	if err != nil {
 		t.Error(err)
 	}
 	if bob.Name != "bob" || bob.Age != 42 || bob.Id != 2 {
-		t.Errorf("struct was not filledo out right; got %v with error %v", bob, err)
+		t.Errorf("struct was not filled out right; got %v with error %v", bob, err)
 	}
 }
