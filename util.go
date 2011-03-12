@@ -87,3 +87,50 @@ func escapeString(str string, args ...interface{}) (result string, err os.Error)
 	
 	return str, nil
 }
+
+func scanMapIntoStruct(obj interface{}, objMap map[string][]byte) os.Error {
+	objPtr, ok := reflect.NewValue(obj).(*reflect.PtrValue)
+	if !ok {
+		return os.NewError(fmt.Sprintf("%v", ok))
+	}
+	dataStruct, ok := objPtr.Elem().(*reflect.StructValue)
+	if !ok {
+		return os.NewError(fmt.Sprintf("%v", ok))
+	}
+	
+	for key, data := range objMap {
+		structField := dataStruct.FieldByName(titleCasedName(key))
+		
+		var v interface{}
+		
+		switch structField.Type().(type) {
+		case *reflect.SliceType:
+			v = data
+		case *reflect.StringType:
+			v = string(data)
+		case *reflect.BoolType:
+			v = string(data) == "1"
+		case *reflect.IntType:
+			x, err := strconv.Atoi(string(data))
+			if err != nil {
+				return os.NewError("arg " + key + " as int: " + err.String())
+			}
+			v = x
+		case *reflect.FloatType:
+			x, err := strconv.Atof64(string(data))
+			if err != nil {
+				return os.NewError("arg " + key + " as float64: " + err.String())
+			}
+			v = x
+		default:
+			return os.NewError("unsupported type in Scan: " + reflect.Typeof(v).String())
+		}
+	
+		if structField.CanSet() {
+			nv := reflect.NewValue(v)
+			structField.SetValue(nv)
+		}
+	}
+	
+	return nil
+}

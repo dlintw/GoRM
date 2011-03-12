@@ -85,3 +85,21 @@ func TestEscapeString(t *testing.T) {
 		t.Errorf("Expected incorrect argument count error, didn't get it.")
 	}
 }
+
+func TestScanMapIntoStruct(t *testing.T) {
+	personMap := map[string][]byte {
+		"name": []byte("bob"),
+		"id": []byte("2"),
+		"age": []byte("42"),
+	}
+	
+	bob := Person{}
+	
+	err := scanMapIntoStruct(&bob, personMap)
+	if err != nil {
+		t.Error(err)
+	}
+	if bob.Name != "bob" || bob.Age != 42 || bob.Id != 2 {
+		t.Errorf("struct was not filledo out right; got %v with error %v", bob, err)
+	}
+}
