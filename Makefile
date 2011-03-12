@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=gorm
+TARG=sdegutis/gorm
 GOFILES=\
 	gorm.go \
 	util.go
