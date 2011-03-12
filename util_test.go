@@ -49,6 +49,21 @@ func TestTitleCasing(t *testing.T) {
 	}
 }
 
+func TestPluralizeString(t *testing.T) {
+	names := map[string]string {
+		"person": "persons",
+		"yak": "yaks",
+		"ghost": "ghosts",
+		"party": "parties",
+	}
+	for key, val := range names {
+		if name := pluralizeString(key); name != val {
+			t.Errorf("Expected [%v] to translate to [%v], got [%v]\n", key, val, name)
+		}
+	}
+}
+
+
 func TestEscapeString(t *testing.T) {
 	nameFuncs := map[func()(string, os.Error)]string {
 		func()(string, os.Error) { return escapeString("where name = ?", "jack") }: "where name = 'jack'",

@@ -61,6 +61,13 @@ func titleCasedName(name string) string {
 	return string(newstr)
 }
 
+func pluralizeString(str string) string {
+	if strings.HasSuffix(str, "y") {
+		str = str[:len(str) - 1] + "ie"
+	}
+	return str + "s"
+}
+
 func escapeString(str string, args ...interface{}) (result string, err os.Error) {
 	if qmarks := strings.Count(str, "?"); qmarks != len(args) {
 		return "", os.NewError(fmt.Sprintf("Incorrect number of arguments: have %d want %d", len(args), qmarks))
