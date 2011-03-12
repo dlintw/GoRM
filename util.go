@@ -3,6 +3,9 @@ package gorm
 import (
 	"reflect"
 	"strings"
+	"strconv"
+	"os"
+	"fmt"
 )
 
 func getTypeName(obj interface{}) (typestr string, isPtr bool) {
@@ -56,4 +59,24 @@ func titleCasedName(name string) string {
 	}
 	
 	return string(newstr)
+}
+
+func escapeString(str string, args ...interface{}) (result string, err os.Error) {
+	if qmarks := strings.Count(str, "?"); qmarks != len(args) {
+		return "", os.NewError(fmt.Sprintf("Incorrect number of arguments: have %d want %d", len(args), qmarks))
+	}
+	
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		argstr := ""
+		switch arg := arg.(type) {
+		case string:
+			argstr = "'" + string(arg) + "'"
+		case int:
+			argstr = strconv.Itoa(arg)
+		}
+		str = strings.Replace(str, "?", argstr, 1)
+	}
+	
+	return str, nil
 }
