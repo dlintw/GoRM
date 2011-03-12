@@ -5,7 +5,6 @@ import (
 	"sdegutis/sqlite"
 	"fmt"
 	"reflect"
-	"log"
 )
 
 type Conn struct {
@@ -94,7 +93,6 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 	sliceValue, _ := rowsPtrValue.Elem().(*reflect.SliceValue)
 	sliceType, ok := rowsPtrType.Elem().(*reflect.SliceType)
 	if !ok {
-		log.Fatalf("%p", sliceType)
 		return os.NewError("needs a pointer to a *slice*")
 	}
 	
@@ -109,7 +107,7 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 	
 	resultsSlice, err := c.getResultsForQuery(getTableName(rowsSlicePtr), condition)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	
 	for _, results := range resultsSlice {
