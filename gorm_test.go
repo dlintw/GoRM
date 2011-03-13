@@ -87,8 +87,6 @@ func TestCopyTemp(t *testing.T) {
 }
 
 func TestInsertViaSave(t *testing.T) {
-	return
-	
 	db, _ := OpenDB(copyTemp(t, "test.db"))
 	defer db.Close()
 
@@ -106,7 +104,7 @@ func TestInsertViaSave(t *testing.T) {
 	}
 	
 	var people []Person
-	db.GetAll(&people, "id > 0")
+	db.GetAll(&people, "")
 
 	if len(people) != 3 {
 		t.Errorf("the db should contain 3 people now, but it contains %d", len(people))

@@ -49,11 +49,70 @@ func (c *Conn) getResultsForQuery(tableName, condition string, args []interface{
 	return
 }
 
+func (c *Conn) insert(tableName string, properties map[string]interface{}) (int, os.Error) {
+	var keys []string
+	var placeholders []string
+	var args []interface{}
+
+	for key, val := range properties {
+		keys = append(keys, key)
+		placeholders = append(placeholders, "?")
+		args = append(args, val)
+	}
+
+	statement := fmt.Sprintf("insert into %v (%v) values (%v)",
+		tableName,
+		strings.Join(keys, ", "),
+		strings.Join(placeholders, ", "))
+
+	err := c.conn.Exec(statement, args...)
+	if err != nil {
+		return -1, err
+	}
+	
+	s, err := c.conn.Prepare("select last_insert_rowid()")
+	if err != nil {
+		return -1, err
+	}
+
+	defer s.Finalize()
+	err = s.Exec()
+	if err != nil {
+		return -1, err
+	}
+
+	id := -1
+	
+	if s.Next() {
+		err := s.Scan(&id)
+		if err != nil {
+			return -1, err
+		}
+	}
+	
+	return id, nil
+}
+
 func (c *Conn) Save(rowStruct interface{}) os.Error {
 	results, _ := scanStructIntoMap(reflect.NewValue(rowStruct))
+	tableName := getTableName(rowStruct)
 
 	id := results["id"]
 	results["id"] = 0, false
+	
+	if id == 0 {
+		id, err := c.insert(tableName, results)
+		if err != nil {
+			return nil
+		}
+		
+		structPtr := reflect.NewValue(rowStruct).(*reflect.PtrValue)
+		structVal := structPtr.Elem().(*reflect.StructValue)
+		structField := structVal.FieldByName("Id")
+		structField.SetValue(reflect.NewValue(id))
+		
+		return nil
+	}
 
 	var updates []string
 	var args []interface{}
@@ -64,7 +123,7 @@ func (c *Conn) Save(rowStruct interface{}) os.Error {
 	}
 
 	statement := fmt.Sprintf("update %v set %v where id = %v",
-		getTableName(rowStruct),
+		tableName,
 		strings.Join(updates, ", "),
 		id)
 
