@@ -86,6 +86,33 @@ func TestCopyTemp(t *testing.T) {
 	}
 }
 
+func TestInsertViaSave(t *testing.T) {
+	return
+	
+	db, _ := OpenDB(copyTemp(t, "test.db"))
+	defer db.Close()
+
+	var james Person
+	james.Name = "james"
+	james.Age = 29
+	
+	err := db.Save(&james)
+	if err != nil {
+		t.Error(err)
+	}
+	
+	if james.Id == 0 {
+		t.Error("james should have a new Id, but doesnt. sigh.")
+	}
+	
+	var people []Person
+	db.GetAll(&people, "id > 0")
+
+	if len(people) != 3 {
+		t.Errorf("the db should contain 3 people now, but it contains %d", len(people))
+	}
+}
+
 func TestSave(t *testing.T) {
 	db, _ := OpenDB(copyTemp(t, "test.db"))
 	defer db.Close()
@@ -115,7 +142,7 @@ func TestGetMultiple(t *testing.T) {
 	defer db.Close()
 
 	var peoples []Person
-	err := db.GetAll(&peoples, "id > 0")
+	err := db.GetAll(&peoples, "")
 
 	if err != nil {
 		t.Error(err)
@@ -132,5 +159,27 @@ func TestGetMultiple(t *testing.T) {
 
 	if !reflect.DeepEqual(peoples, comparablePeoples) {
 		t.Errorf("peoples was not filled out properly %v", peoples)
+	}
+}
+
+func TestGetMultipleWithoutCondition(t *testing.T) {
+	db, _ := OpenDB("test.db")
+	defer db.Close()
+
+	var people1 []Person
+	db.GetAll(&people1, "id > 0")
+	
+	var people2 []Person
+	err := db.GetAll(&people2, "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(people1) != len(people2) {
+		t.Errorf("wrong number of people returned, should be %d, but got %d", len(people1), len(people2))
+	}
+
+	if !reflect.DeepEqual(people1, people2) {
+		t.Errorf("people2 was not filled out properly %v", people2)
 	}
 }

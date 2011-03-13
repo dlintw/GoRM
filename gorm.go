@@ -117,7 +117,10 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 
 	sliceElementType := sliceType.Elem()
 
-	condition = fmt.Sprintf("where %v", condition)
+	condition = strings.TrimSpace(condition)
+	if len(condition) > 0 {
+		condition = fmt.Sprintf("where %v", condition)
+	}
 
 	resultsSlice, err := c.getResultsForQuery(getTableName(rowsSlicePtr), condition, args)
 	if err != nil {
