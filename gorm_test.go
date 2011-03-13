@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"bytes"
 	"reflect"
+	"fmt"
 )
 
 type Person struct {
@@ -66,6 +67,7 @@ func copyTemp(t *testing.T, path string) string {
 		t.Errorf("could not read supposedly 'copyable' file")
 	}
 	f.Write(data)
+	fmt.Println(f.Name())
 	return f.Name()
 }
 

@@ -4,6 +4,8 @@ import (
 	"os"
 	"sdegutis/sqlite"
 	"fmt"
+	"strings"
+	// "log"
 	"reflect"
 )
 
@@ -48,8 +50,35 @@ func (c *Conn) getResultsForQuery(tableName, condition string) (resultsSlice []m
 }
 
 func (c *Conn) Save(rowStruct interface{}) os.Error {
+	results, _ := scanStructIntoMap(reflect.NewValue(rowStruct))
 	
+	id := results["id"]
+	results["id"] = 0, false
 	
+	// log.Fatalf("%v\n", id)
+	var updates []string
+	
+	for key, val := range results {
+		escStr, err := escapeString(fmt.Sprintf("%v = ?", key), val)
+		if err != nil {
+			return err
+		}
+		updates = append(updates, escStr)
+	}
+	
+	updatesStr := strings.Join(updates, ", ")
+	
+    s, err := c.conn.Prepare(fmt.Sprintf("update %v set %v where id = %v", getTableName(rowStruct), updatesStr, id))
+    if err != nil {
+		return err
+    }
+
+    defer s.Finalize()
+    err = s.Exec()
+    if err != nil {
+        return err
+    }
+
 	return nil
 }
 
