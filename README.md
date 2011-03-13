@@ -4,12 +4,12 @@ GoRM is an ORM for Go. It lets you map Go `struct`s to tables in a database. It'
 
 ### How do we use it?
 
-#### Open a database
+Open a database
 
 	db, _ := OpenDB("test.db")
 	db.Close() // you'll probably wanna close it at some point
 
-#### Model a struct after a table in the db
+Model a struct after a table in the db
 
 	type Person struct {
 		Id int
@@ -17,7 +17,7 @@ GoRM is an ORM for Go. It lets you map Go `struct`s to tables in a database. It'
 		Age int
 	}
 
-#### Create an object and save it
+Create an object and save it
 
 	var someone Person
 	someone.Name = "john"
@@ -25,7 +25,7 @@ GoRM is an ORM for Go. It lets you map Go `struct`s to tables in a database. It'
 	
 	db.Save(&someone)
 
-#### Fetch a single object
+Fetch a single object
 
 	var person1 Person
 	db.Get(&person1, "id = ?", 3)
@@ -39,7 +39,7 @@ GoRM is an ORM for Go. It lets you map Go `struct`s to tables in a database. It'
 	var person4 Person
 	db.Get(&person4, "name = ? and age < ?", "john", 88) // even more complex
 
-#### Fetch multiple objects
+Fetch multiple objects
 
 	var bobs []Person
 	err := db.GetAll(&bobs, "name = ?", "bob")
@@ -47,7 +47,7 @@ GoRM is an ORM for Go. It lets you map Go `struct`s to tables in a database. It'
 	var everyone []Person
 	err := db.GetAll(&everyone, "") // use empty string to omit "where" clause
 
-#### Saving new and existing objects
+Saving new and existing objects
 
 	person2.Name = "Jack" // an already-existing person in the database, from the example above
 	db.Save(&person2)
