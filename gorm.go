@@ -55,19 +55,19 @@ func (c *Conn) Save(rowStruct interface{}) os.Error {
 	id := results["id"]
 	results["id"] = 0, false
 
-	// log.Fatalf("%v\n", id)
 	var updates []string
 	var args []interface{}
 
 	for key, val := range results {
+		updates = append(updates, fmt.Sprintf("%v = ?", key))
 		args = append(args, val)
-		escStr := fmt.Sprintf("%v = ?", key)
-		updates = append(updates, escStr)
 	}
 
-	updatesStr := strings.Join(updates, ", ")
-	statement := fmt.Sprintf("update %v set %v where id = %v", getTableName(rowStruct), updatesStr, id)
-	
+	statement := fmt.Sprintf("update %v set %v where id = %v",
+		getTableName(rowStruct),
+		strings.Join(updates, ", "),
+		id)
+
 	return c.conn.Exec(statement, args...)
 }
 
