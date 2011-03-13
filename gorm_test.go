@@ -109,6 +109,19 @@ func TestInsertViaSave(t *testing.T) {
 	if len(people) != 3 {
 		t.Errorf("the db should contain 3 people now, but it contains %d", len(people))
 	}
+
+	found := false
+
+	for i := 0; i < len(people); i++ {
+		person := people[i]
+		if person.Name == "james" && person.Age == 29 && person.Id == 3 {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("could not find james in the db. oh no hes lost!! quick call for help!")
+	}
 }
 
 func TestSave(t *testing.T) {
