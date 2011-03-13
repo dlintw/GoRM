@@ -9,9 +9,9 @@ import (
 )
 
 type Person struct {
-	Id int
+	Id   int
 	Name string
-	Age int
+	Age  int
 }
 
 func TestOpenDB(t *testing.T) {
@@ -28,14 +28,14 @@ func TestOpenDB(t *testing.T) {
 func TestGetSingle(t *testing.T) {
 	db, _ := OpenDB("test.db")
 	defer db.Close()
-	
+
 	var bob Person
 	err := db.Get(&bob, "name = ?", "bob")
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if bob.Name != "bob" || bob.Age != 24 || bob.Id != 2 {
 		t.Errorf("bob was not filled out properly [%v]", bob)
 	}
@@ -44,10 +44,10 @@ func TestGetSingle(t *testing.T) {
 func TestGetSingleById(t *testing.T) {
 	db, _ := OpenDB("test.db")
 	defer db.Close()
-	
+
 	var bob Person
 	err := db.Get(&bob, 2)
-	
+
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,22 +87,22 @@ func TestCopyTemp(t *testing.T) {
 func TestSave(t *testing.T) {
 	db, _ := OpenDB(copyTemp(t, "test.db"))
 	defer db.Close()
-	
+
 	newName := "Fred Jones"
-	
+
 	var bob Person
 	db.Get(&bob, 2)
-	
+
 	bob.Name = newName
 	db.Save(&bob)
-	
+
 	var fred Person
 	err := db.Get(&fred, 2)
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if fred.Name != newName {
 		t.Errorf("name should have been %q, got %q instead", newName, fred.Name)
 	}
@@ -111,23 +111,23 @@ func TestSave(t *testing.T) {
 func TestGetMultiple(t *testing.T) {
 	db, _ := OpenDB("test.db")
 	defer db.Close()
-	
+
 	var peoples []Person
 	err := db.GetAll(&peoples, "id > 0")
-	
+
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if len(peoples) != 2 {
 		t.Errorf("wrong number of people returned, should be 2, but got %d", len(peoples))
 	}
-	
-	comparablePeoples := []Person {
+
+	comparablePeoples := []Person{
 		Person{Name: "john", Id: 1, Age: 42},
 		Person{Name: "bob", Id: 2, Age: 24},
 	}
-	
+
 	if !reflect.DeepEqual(peoples, comparablePeoples) {
 		t.Errorf("peoples was not filled out properly %v", peoples)
 	}

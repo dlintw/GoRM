@@ -11,19 +11,19 @@ import (
 func getTypeName(obj interface{}) (typestr string) {
 	typ := reflect.Typeof(obj)
 	typestr = typ.String()
-	
+
 	lastDotIndex := strings.LastIndex(typestr, ".")
 	if lastDotIndex != -1 {
 		typestr = typestr[lastDotIndex+1:]
 	}
-	
+
 	return
 }
 
 func snakeCasedName(name string) string {
 	newstr := make([]int, 0)
 	firstTime := true
-	
+
 	for _, chr := range name {
 		if isUpper := 'A' <= chr && chr <= 'Z'; isUpper {
 			if firstTime == true {
@@ -35,14 +35,14 @@ func snakeCasedName(name string) string {
 		}
 		newstr = append(newstr, chr)
 	}
-	
+
 	return string(newstr)
 }
 
 func titleCasedName(name string) string {
 	newstr := make([]int, 0)
 	upNextChar := true
-	
+
 	for _, chr := range name {
 		switch {
 		case upNextChar:
@@ -52,16 +52,16 @@ func titleCasedName(name string) string {
 			upNextChar = true
 			continue
 		}
-		
+
 		newstr = append(newstr, chr)
 	}
-	
+
 	return string(newstr)
 }
 
 func pluralizeString(str string) string {
 	if strings.HasSuffix(str, "y") {
-		str = str[:len(str) - 1] + "ie"
+		str = str[:len(str)-1] + "ie"
 	}
 	return str + "s"
 }
@@ -70,7 +70,7 @@ func escapeString(str string, args ...interface{}) (result string, err os.Error)
 	if qmarks := strings.Count(str, "?"); qmarks != len(args) {
 		return "", os.NewError(fmt.Sprintf("Incorrect number of arguments: have %d want %d", len(args), qmarks))
 	}
-	
+
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		argstr := ""
@@ -82,7 +82,7 @@ func escapeString(str string, args ...interface{}) (result string, err os.Error)
 		}
 		str = strings.Replace(str, "?", argstr, 1)
 	}
-	
+
 	return str, nil
 }
 
@@ -91,20 +91,20 @@ func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
 	if !ok {
 		return os.NewError("needed pointer")
 	}
-	
+
 	dataStruct, ok := objPtr.Elem().(*reflect.StructValue)
 	if !ok {
 		return os.NewError("expected a pointer to a struct")
 	}
-	
+
 	for key, data := range objMap {
 		structField := dataStruct.FieldByName(titleCasedName(key))
 		if !structField.CanSet() {
 			continue
 		}
-		
+
 		var v interface{}
-		
+
 		switch structField.Type().(type) {
 		case *reflect.SliceType:
 			v = data
@@ -127,10 +127,10 @@ func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
 		default:
 			return os.NewError("unsupported type in Scan: " + reflect.Typeof(v).String())
 		}
-		
+
 		structField.SetValue(reflect.NewValue(v))
 	}
-	
+
 	return nil
 }
 
@@ -139,25 +139,25 @@ func scanStructIntoMap(obj reflect.Value) (map[string]interface{}, os.Error) {
 	if !ok {
 		return nil, os.NewError("needed a pointer")
 	}
-	
+
 	dataStruct, ok := objPtr.Elem().(*reflect.StructValue)
 	if !ok {
 		return nil, os.NewError("expected a pointer to a struct")
 	}
-	
+
 	dataStructType := dataStruct.Type().(*reflect.StructType)
-	
+
 	mapped := make(map[string]interface{})
-	
+
 	for i := 0; i < dataStructType.NumField(); i++ {
 		field := dataStructType.Field(i)
 		fieldName := field.Name
-		
+
 		mapKey := snakeCasedName(fieldName)
 		value := dataStruct.FieldByName(fieldName).Interface()
-		
+
 		mapped[mapKey] = value
 	}
-	
+
 	return mapped, nil
 }
