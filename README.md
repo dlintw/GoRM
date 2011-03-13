@@ -59,6 +59,12 @@ Saving new and existing objects
 	db.Save(&newGuy)
 	// newGuy.Id is suddenly valid, and he's in the database now.
 
+### Installing GoRM
+
+Obviously [Go](http://golang.org/) should be installed. [The official installation directions](http://golang.org/doc/install.html) are recommended, rather than installing it through a package (such as homebrew).
+
+This package also requires [my version of the `sqlite` package](https://github.com/sdegutis/sqlite-go-wrapper). Clone it, then run `make install` and you'll be all set.
+
 ### Known bugs
 
 Right now, it only interfaces with SQLite. The goal however is to add support for other databases in the future, including maybe PostgreSQL and CouchDB or NoSQL? Who knows.
@@ -66,3 +72,9 @@ Right now, it only interfaces with SQLite. The goal however is to add support fo
 Also, at the moment, relationship-support is in the works, but not yet implemented.
 
 All in all, it's not entirely ready for advanced use yet, but it's getting there.
+
+### Etc
+
+The idea came about in #go-nuts on irc.freenode.net... Namegduf and wrtp were instrumental in helping solidify the main principles, and I think wrtp came up with the name.
+
+Feel free to send pull requests with cool features added :)
