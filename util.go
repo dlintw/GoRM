@@ -5,7 +5,6 @@ import (
 	"strings"
 	"strconv"
 	"os"
-	"fmt"
 )
 
 func getTypeName(obj interface{}) (typestr string) {
@@ -64,26 +63,6 @@ func pluralizeString(str string) string {
 		str = str[:len(str)-1] + "ie"
 	}
 	return str + "s"
-}
-
-func escapeString(str string, args ...interface{}) (result string, err os.Error) {
-	if qmarks := strings.Count(str, "?"); qmarks != len(args) {
-		return "", os.NewError(fmt.Sprintf("Incorrect number of arguments: have %d want %d", len(args), qmarks))
-	}
-
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-		argstr := ""
-		switch arg := arg.(type) {
-		case string:
-			argstr = "'" + string(arg) + "'"
-		case int:
-			argstr = strconv.Itoa(arg)
-		}
-		str = strings.Replace(str, "?", argstr, 1)
-	}
-
-	return str, nil
 }
 
 func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {

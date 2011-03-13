@@ -26,14 +26,14 @@ func getTableName(obj interface{}) string {
 	return pluralizeString(snakeCasedName(getTypeName(obj)))
 }
 
-func (c *Conn) getResultsForQuery(tableName, condition string) (resultsSlice []map[string][]byte, err os.Error) {
+func (c *Conn) getResultsForQuery(tableName, condition string, args []interface{}) (resultsSlice []map[string][]byte, err os.Error) {
 	s, err := c.conn.Prepare(fmt.Sprintf("select * from %v %v", tableName, condition))
 	if err != nil {
 		return nil, err
 	}
 
 	defer s.Finalize()
-	err = s.Exec()
+	err = s.Exec(args...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,19 +57,18 @@ func (c *Conn) Save(rowStruct interface{}) os.Error {
 
 	// log.Fatalf("%v\n", id)
 	var updates []string
+	var args []interface{}
 
 	for key, val := range results {
-		escStr, err := escapeString(fmt.Sprintf("%v = ?", key), val)
-		if err != nil {
-			return err
-		}
+		args = append(args, val)
+		escStr := fmt.Sprintf("%v = ?", key)
 		updates = append(updates, escStr)
 	}
 
 	updatesStr := strings.Join(updates, ", ")
 	statement := fmt.Sprintf("update %v set %v where id = %v", getTableName(rowStruct), updatesStr, id)
 	
-	return c.conn.Exec(statement)
+	return c.conn.Exec(statement, args...)
 }
 
 func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {
@@ -83,14 +82,9 @@ func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interfa
 		args = append(args, condition)
 	}
 
-	conditionStr, err := escapeString(conditionStr, args...)
-	if err != nil {
-		return err
-	}
-
 	conditionStr = fmt.Sprintf("where %v", conditionStr)
 
-	resultsSlice, err := c.getResultsForQuery(getTableName(rowStruct), conditionStr)
+	resultsSlice, err := c.getResultsForQuery(getTableName(rowStruct), conditionStr, args)
 	if err != nil {
 		return err
 	}
@@ -123,14 +117,9 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 
 	sliceElementType := sliceType.Elem()
 
-	condition, err := escapeString(condition, args...)
-	if err != nil {
-		return err
-	}
-
 	condition = fmt.Sprintf("where %v", condition)
 
-	resultsSlice, err := c.getResultsForQuery(getTableName(rowsSlicePtr), condition)
+	resultsSlice, err := c.getResultsForQuery(getTableName(rowsSlicePtr), condition, args)
 	if err != nil {
 		return err
 	}

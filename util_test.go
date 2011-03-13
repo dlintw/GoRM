@@ -3,7 +3,6 @@ package gorm
 import (
 	"testing"
 	"reflect"
-	"os"
 )
 
 func TestTypeName(t *testing.T) {
@@ -58,29 +57,6 @@ func TestPluralizeString(t *testing.T) {
 		if name := pluralizeString(key); name != val {
 			t.Errorf("Expected [%v] to translate to [%v], got [%v]\n", key, val, name)
 		}
-	}
-}
-
-
-func TestEscapeString(t *testing.T) {
-	nameFuncs := map[func() (string, os.Error)]string{
-		func() (string, os.Error) { return escapeString("where name = ?", "jack") }:                 "where name = 'jack'",
-		func() (string, os.Error) { return escapeString("where age = ?", 42) }:                      "where age = 42",
-		func() (string, os.Error) { return escapeString("where name = ? and age = ?", "jack", 42) }: "where name = 'jack' and age = 42",
-	}
-
-	for key, val := range nameFuncs {
-		if str, err := key(); str != val {
-			t.Errorf("Expected [%v] to translate to [%v], got [%v] with error [%v]\n", key, val, str, err)
-		}
-	}
-	str, err := escapeString("where age = ?", 42, "jack")
-	if str != "" || err == nil {
-		t.Errorf("Expected incorrect argument count error, didn't get it.")
-	}
-	str, err = escapeString("where name = ? and age = ?", 42)
-	if str != "" || err == nil {
-		t.Errorf("Expected incorrect argument count error, didn't get it.")
 	}
 }
 
