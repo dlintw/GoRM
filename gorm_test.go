@@ -61,7 +61,7 @@ func copyTemp(t *testing.T, path string) string {
 	if err != nil {
 		t.Errorf("could not read supposedly 'copyable' file")
 	}
-	
+
 	f, err := ioutil.TempFile("", "gorm-sqlite-prefix")
 	if err != nil {
 		t.Errorf("could not create tempfile for writing")
@@ -69,7 +69,7 @@ func copyTemp(t *testing.T, path string) string {
 	f.Write(data)
 	fname := f.Name()
 	f.Close()
-	
+
 	return fname
 }
 
@@ -93,16 +93,16 @@ func TestInsertViaSave(t *testing.T) {
 	var james Person
 	james.Name = "james"
 	james.Age = 29
-	
+
 	err := db.Save(&james)
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if james.Id == 0 {
 		t.Error("james should have a new Id, but doesnt. sigh.")
 	}
-	
+
 	var people []Person
 	db.GetAll(&people, "")
 
@@ -166,7 +166,7 @@ func TestGetMultipleWithoutCondition(t *testing.T) {
 
 	var people1 []Person
 	db.GetAll(&people1, "id > 0")
-	
+
 	var people2 []Person
 	err := db.GetAll(&people2, "")
 	if err != nil {
