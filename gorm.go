@@ -67,19 +67,9 @@ func (c *Conn) Save(rowStruct interface{}) os.Error {
 	}
 
 	updatesStr := strings.Join(updates, ", ")
-
-	s, err := c.conn.Prepare(fmt.Sprintf("update %v set %v where id = %v", getTableName(rowStruct), updatesStr, id))
-	if err != nil {
-		return err
-	}
-
-	defer s.Finalize()
-	err = s.Exec()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	statement := fmt.Sprintf("update %v set %v where id = %v", getTableName(rowStruct), updatesStr, id)
+	
+	return c.conn.Exec(statement)
 }
 
 func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interface{}) os.Error {

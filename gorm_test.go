@@ -58,7 +58,7 @@ func TestGetSingleById(t *testing.T) {
 }
 
 func copyTemp(t *testing.T, path string) string {
-	f, err := ioutil.TempFile("", "")
+	f, err := ioutil.TempFile("", "gorm-sqlite-prefix")
 	if err != nil {
 		t.Errorf("could not create tempfile for writing")
 	}
