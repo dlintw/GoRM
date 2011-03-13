@@ -18,7 +18,7 @@ func (c *Conn) Close() os.Error {
 }
 
 func OpenDB(filename string) (*Conn, os.Error) {
-	conn, err := sqlite.Open("test.db")
+	conn, err := sqlite.Open(filename)
 	return &Conn{conn: conn}, err
 }
 

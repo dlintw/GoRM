@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"bytes"
 	"reflect"
-	"fmt"
 )
 
 type Person struct {
@@ -58,17 +57,20 @@ func TestGetSingleById(t *testing.T) {
 }
 
 func copyTemp(t *testing.T, path string) string {
-	f, err := ioutil.TempFile("", "gorm-sqlite-prefix")
-	if err != nil {
-		t.Errorf("could not create tempfile for writing")
-	}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Errorf("could not read supposedly 'copyable' file")
 	}
+	
+	f, err := ioutil.TempFile("", "gorm-sqlite-prefix")
+	if err != nil {
+		t.Errorf("could not create tempfile for writing")
+	}
 	f.Write(data)
-	fmt.Println(f.Name())
-	return f.Name()
+	fname := f.Name()
+	f.Close()
+	
+	return fname
 }
 
 func TestCopyTemp(t *testing.T) {
