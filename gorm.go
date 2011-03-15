@@ -94,7 +94,7 @@ func (c *Conn) insert(tableName string, properties map[string]interface{}) (int,
 }
 
 func (c *Conn) Save(rowStruct interface{}) os.Error {
-	results, _ := scanStructIntoMap(reflect.NewValue(rowStruct))
+	results, _ := scanStructIntoMap(rowStruct)
 	tableName := getTableName(rowStruct)
 
 	id := results["id"]
@@ -153,7 +153,7 @@ func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interfa
 		return os.NewError("did not find any results")
 	case 1:
 		results := resultsSlice[0]
-		scanMapIntoStruct(reflect.NewValue(rowStruct), results)
+		scanMapIntoStruct(rowStruct, results)
 	default:
 		return os.NewError("more than one row matched")
 	}
@@ -188,7 +188,7 @@ func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interf
 
 	for _, results := range resultsSlice {
 		newValue := reflect.MakeZero(sliceElementType)
-		scanMapIntoStruct(newValue.Addr(), results)
+		scanMapIntoStruct(newValue.Addr().Interface(), results)
 		sliceValue.SetValue(reflect.Append(sliceValue, newValue))
 	}
 

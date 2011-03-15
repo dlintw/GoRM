@@ -65,8 +65,8 @@ func pluralizeString(str string) string {
 	return str + "s"
 }
 
-func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
-	dataStruct, ok := reflect.Indirect(obj).(*reflect.StructValue)
+func scanMapIntoStruct(obj interface{}, objMap map[string][]byte) os.Error {
+	dataStruct, ok := reflect.Indirect(reflect.NewValue(obj)).(*reflect.StructValue)
 	if !ok {
 		return os.NewError("expected a pointer to a struct")
 	}
@@ -108,8 +108,8 @@ func scanMapIntoStruct(obj reflect.Value, objMap map[string][]byte) os.Error {
 	return nil
 }
 
-func scanStructIntoMap(obj reflect.Value) (map[string]interface{}, os.Error) {
-	dataStruct, ok := reflect.Indirect(obj).(*reflect.StructValue)
+func scanStructIntoMap(obj interface{}) (map[string]interface{}, os.Error) {
+	dataStruct, ok := reflect.Indirect(reflect.NewValue(obj)).(*reflect.StructValue)
 	if !ok {
 		return nil, os.NewError("expected a pointer to a struct")
 	}

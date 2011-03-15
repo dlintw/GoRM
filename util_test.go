@@ -66,7 +66,7 @@ func TestScanStructIntoMap(t *testing.T) {
 	pete.Age = 32
 	pete.Id = 7
 
-	peteMap, err := scanStructIntoMap(reflect.NewValue(&pete))
+	peteMap, err := scanStructIntoMap(&pete)
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +91,7 @@ func TestScanMapIntoStruct(t *testing.T) {
 
 	bob := Person{}
 
-	err := scanMapIntoStruct(reflect.NewValue(&bob), personMap)
+	err := scanMapIntoStruct(&bob, personMap)
 	if err != nil {
 		t.Error(err)
 	}
