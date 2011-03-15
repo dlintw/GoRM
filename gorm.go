@@ -162,19 +162,12 @@ func (c *Conn) Get(rowStruct interface{}, condition interface{}, args ...interfa
 }
 
 func (c *Conn) GetAll(rowsSlicePtr interface{}, condition string, args ...interface{}) os.Error {
-	rowsPtrValue, _ := reflect.NewValue(rowsSlicePtr).(*reflect.PtrValue)
-	rowsPtrType, ok := reflect.Typeof(rowsSlicePtr).(*reflect.PtrType)
+	sliceValue, ok := reflect.Indirect(reflect.NewValue(rowsSlicePtr)).(*reflect.SliceValue)
 	if !ok {
-		return os.NewError("needs a *pointer* to a slice")
+		return os.NewError("needs a pointer to a slice")
 	}
 
-	sliceValue, _ := rowsPtrValue.Elem().(*reflect.SliceValue)
-	sliceType, ok := rowsPtrType.Elem().(*reflect.SliceType)
-	if !ok {
-		return os.NewError("needs a pointer to a *slice*")
-	}
-
-	sliceElementType := sliceType.Elem()
+	sliceElementType := sliceValue.Type().(*reflect.SliceType).Elem()
 
 	condition = strings.TrimSpace(condition)
 	if len(condition) > 0 {
